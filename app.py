@@ -96,7 +96,7 @@ def chat():
         client = get_anthropic_client()
 
         response = client.messages.create(
-            model="claude-3-5-sonnet-20241022",  # Claude 3.5 Sonnet (latest)
+            model="claude-3-5-sonnet-20240620",  # Claude 3.5 Sonnet (stable)
             max_tokens=1024,
             system=system_prompt,
             messages=[
