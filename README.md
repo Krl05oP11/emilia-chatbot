@@ -2,6 +2,10 @@
 
 Asistente virtual para Schaller & Ponce, reemplazo de n8n con control total y confiabilidad.
 
+🟢 **Estado:** En producción desde 18/12/2025
+🔗 **URL Servicio:** https://emilia-chatbot.onrender.com
+🌐 **Website:** https://schaller-ponce.com.ar
+
 ## Características
 
 - ✅ **Sin dependencias de plataformas inestables:** Código Python puro
@@ -206,10 +210,15 @@ Website (muestra mensaje)
 
 ### Actualizar modelo de Claude
 
-Edita `app.py`, línea del model:
+Edita `app.py`, línea 99:
 ```python
-model="claude-3-5-sonnet-20241022",  # Cambiar aquí
+model="claude-3-haiku-20240307",  # Modelo actual en producción
 ```
+
+Modelos disponibles:
+- `claude-3-haiku-20240307` - Rápido y económico (actual)
+- `claude-3-sonnet-20240229` - Balance precio/calidad
+- `claude-3-opus-20240229` - Máxima calidad
 
 ### Aumentar timeout
 
