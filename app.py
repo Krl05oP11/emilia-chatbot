@@ -162,29 +162,17 @@ def chat():
 
 @app.route('/health')
 def health():
-    """Endpoint de health check detallado"""
-    try:
-        # Verificar que la API key esté configurada
-        api_key = os.environ.get('ANTHROPIC_API_KEY')
-        has_api_key = bool(api_key)
-
-        # Verificar que el prompt se pueda cargar
-        prompt = load_system_prompt()
-        has_prompt = bool(prompt)
-
-        return jsonify({
-            "status": "healthy",
-            "checks": {
-                "api_key_configured": has_api_key,
-                "prompt_loaded": has_prompt,
-                "prompt_length": len(prompt) if has_prompt else 0
-            }
-        })
-    except Exception as e:
-        return jsonify({
-            "status": "unhealthy",
-            "error": str(e)
-        }), 500
+    """Endpoint de health check — no dispara llamadas externas"""
+    api_key = os.environ.get('ANTHROPIC_API_KEY')
+    cached = _prompt_cache["content"]
+    return jsonify({
+        "status": "healthy",
+        "checks": {
+            "api_key_configured": bool(api_key),
+            "prompt_cached": bool(cached),
+            "prompt_length": len(cached) if cached else 0
+        }
+    })
 
 if __name__ == '__main__':
     # Para desarrollo local
