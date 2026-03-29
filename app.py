@@ -4,6 +4,8 @@ Reemplazo de n8n con control total y confiabilidad
 """
 
 import os
+import time
+import urllib.request
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from anthropic import Anthropic
@@ -32,13 +34,39 @@ CORS(app, resources={
     }
 })
 
-# Cargar prompt de sistema
+# Cache del prompt para no llamar GitHub en cada request
+_prompt_cache = {"content": None, "loaded_at": 0}
+PROMPT_CACHE_TTL = 300  # 5 minutos
+
+GITHUB_PROMPT_URL = (
+    "https://raw.githubusercontent.com/Krl05oP11/emilia-chatbot/main/prompt.md"
+)
+
 def load_system_prompt():
-    """Carga el prompt de sistema desde archivo"""
+    """Carga el prompt desde GitHub (con cache de 5 min) o desde archivo local como fallback"""
+    now = time.time()
+    if _prompt_cache["content"] and (now - _prompt_cache["loaded_at"]) < PROMPT_CACHE_TTL:
+        return _prompt_cache["content"]
+
+    # Intentar cargar desde GitHub
+    try:
+        with urllib.request.urlopen(GITHUB_PROMPT_URL, timeout=5) as resp:
+            prompt = resp.read().decode("utf-8")
+            _prompt_cache["content"] = prompt
+            _prompt_cache["loaded_at"] = now
+            logger.info(f"Prompt cargado desde GitHub ({len(prompt)} chars)")
+            return prompt
+    except Exception as e:
+        logger.warning(f"No se pudo cargar prompt desde GitHub: {e}. Usando archivo local.")
+
+    # Fallback: archivo local
     prompt_file = os.path.join(os.path.dirname(__file__), 'prompt.md')
     try:
         with open(prompt_file, 'r', encoding='utf-8') as f:
-            return f.read()
+            prompt = f.read()
+            _prompt_cache["content"] = prompt
+            _prompt_cache["loaded_at"] = now
+            return prompt
     except FileNotFoundError:
         logger.warning("prompt.md no encontrado, usando prompt por defecto")
         return """Eres EmilIA, la asistente virtual de Schaller & Ponce, una consultoría especializada en Inteligencia Artificial y Data Science.
